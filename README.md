@@ -22,7 +22,7 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [x] Endpoints de personagens: listagem com filtros e paginação, e busca por id (`app/api/v1/endpoints/characters.py`)
 
 **Em andamento / próximos passos**
-- [ ] Registrar o router da v1 no `main.py` (`app/api/v1/router.py`)
+- [x] Registrar o router da v1 no `main.py` (`app/api/v1/router.py`)
 - [ ] Camada de serviço com as regras de negócio (`app/services/`)
 - [ ] Configurações centralizadas com variáveis de ambiente (`app/core/config.py`)
 - [ ] Tratamento global de erros (`app/core/exceptions.py`)
@@ -85,15 +85,6 @@ uvicorn app.main:app --reload
 
 - API: http://localhost:8000
 - Documentação interativa (Swagger): http://localhost:8000/docs
-
-## Endpoints
-
-> Os endpoints abaixo são o objetivo da v1. Até o router ser registrado no `main.py`, a API responde apenas com as rotas de exemplo.
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/characters` | Lista personagens, com filtros e paginação |
-| GET | `/characters/{id}` | Retorna um personagem pelo id (ex.: `hu-tao`) |
 
 ### Filtros de `/characters`
 
