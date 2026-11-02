@@ -23,10 +23,10 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 
 **Em andamento / próximos passos**
 - [x] Registrar o router da v1 no `main.py` (`app/api/v1/router.py`)
-- [ ] Camada de serviço com as regras de negócio (`app/services/`)
+- [x] Camada de serviço com as regras de negócio (`app/services/`)
 - [ ] Configurações centralizadas com variáveis de ambiente (`app/core/config.py`)
 - [ ] Tratamento global de erros (`app/core/exceptions.py`)
-- [ ] Testes automatizados com pytest
+- [x] Testes automatizados com pytest
 - [ ] Usar `Enum` para região, elemento e arma, com validação e lista suspensa no Swagger
 - [ ] Mais filtros: função em combate, afiliação e busca por nome
 - [ ] Futuro: migrar de JSON para SQLite + SQLAlchemy
@@ -139,7 +139,3 @@ pytest
 ## Cadastro de personagens
 
 Por enquanto a API é somente leitura. Novos personagens são adicionados editando `app/data/characters.json`, seguindo o formato de um personagem existente. O `id` deve ser único.
-
-## Licença
-
-Defina a licença do projeto (ex.: MIT).
