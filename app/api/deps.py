@@ -1,14 +1,14 @@
 """Dependências injetáveis usadas pelos endpoints."""
 from functools import lru_cache
-from pathlib import Path
 
 from fastapi import Depends
 
 from app.repositories.character_repository import CharacterRepository
 from app.services.character_service import CharacterService
+from app.core.config import settings
 
 # Caminho do JSON
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "characters.json"
+DATA_PATH = settings.characters_data_path
 
 @lru_cache
 def get_repository() -> CharacterRepository:
