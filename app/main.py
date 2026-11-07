@@ -7,12 +7,15 @@ from app.api.v1.router import api_router
 
 from app.core.config import settings
 
+from app.core.exceptions import register_exception_handlers
+
 app = FastAPI(
     title=settings.app_name,
     description=settings.app_description,
     version=settings.app_version,
 ) 
 
+register_exception_handlers(app)
 
 # Todas as rotas da v1 ficam sob /api/v1
 app.include_router(api_router, prefix=settings.app_version_api)

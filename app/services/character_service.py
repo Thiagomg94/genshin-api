@@ -1,6 +1,7 @@
 """Regras de negócio dos personagens."""
 from app.repositories.character_repository import CharacterRepository
 from app.schemas.character import Character
+from app.core.exceptions import CharacterNotFoundError
 
 
 class CharacterService:
@@ -25,6 +26,9 @@ class CharacterService:
         # Paginação: pega uma fatia da lista filtrada
         return found[offset : offset + limit]
 
-    def get_character(self, character_id: str) -> Character | None:
-        """Busca por ID. Devolve None se não existir."""
-        return self._repository.get(character_id)
+    def get_character(self, character_id: str) -> Character:
+        """Busca por ID. Devolve CharacterNotFoundError se não existir."""
+        character = self._repository.get(character_id)
+        if character is None:
+            raise CharacterNotFoundError(character_id)
+        return character

@@ -1,5 +1,5 @@
 """Rotas de busca dos personagens."""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_character_service
 from app.services.character_service import CharacterService
@@ -34,8 +34,6 @@ def get_character(
         character_id: str,
         service: CharacterService = Depends(get_character_service),
 ):
-    """Busca um personagem pelo id."""
-    character = service.get_character(character_id)
-    if character is None:
-        raise HTTPException(status_code=404, detail="Personagem não encontrado.")
-    return character
+    """Busca um personagem pelo id. Retorna 404 se não existir."""
+    return service.get_character(character_id)
+    
