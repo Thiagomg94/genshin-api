@@ -46,6 +46,7 @@ def test_get_by_id(client):
 def test_get_by_id_not_found(client):
     response = client.get("/api/v1/characters/abc")
     assert response.status_code == 404
+    assert "abc" in response.json()["detail"]
 
 def test_invalid_rarity(client):
     response = client.get("/api/v1/characters", params={"rarity": 6})
