@@ -2,6 +2,7 @@
 from app.repositories.character_repository import CharacterRepository
 from app.schemas.character import Character
 from app.core.exceptions import CharacterNotFoundError
+from app.schemas.character import Character, Region, Vision, WeaponType
 
 
 class CharacterService:
@@ -12,9 +13,9 @@ class CharacterService:
 
     def list_characters(
         self,
-        region: str | None = None,
-        vision: str | None = None,
-        weapon_type: str | None = None,
+        region: Region | None = None,
+        vision: Vision | None = None,
+        weapon_type: WeaponType | None = None,
         rarity: int | None = None,
         limit: int = 20,
         offset: int = 0,

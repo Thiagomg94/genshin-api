@@ -37,11 +37,11 @@ class CharacterRepository:
         results = self._characters
 
         if region:
-            results = [item for item in results if item.region.lower() == region.lower()]
+            results = [item for item in results if item.region == region]
         if vision:
-            results = [item for item in results if item.vision.lower() == vision.lower()]
+            results = [item for item in results if item.vision == vision]
         if weapon_type:
-            results = [item for item in results if item.weapon_type.lower() == weapon_type.lower()]
+            results = [item for item in results if item.weapon_type == weapon_type]
         if rarity:
             results = [item for item in results if item.rarity == rarity]
 
