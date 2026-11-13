@@ -55,4 +55,20 @@ def test_invalid_rarity(client):
 def test_invalid_region_returns_422(client):
     response = client.get("/api/v1/characters", params={"region": "Atlantis"})
     assert response.status_code == 422
-    
+
+def test_by_combat_role_partial(client):
+    response = client.get("/api/v1/characters", params={"combat_role": "healer"})
+    assert [c["id"] for c in response.json()] == ["barbara"]
+
+def test_filter_by_affiliation_ignores_accents(client):
+    # "cla" sem acento deve encontrar "Clã Kamisato"
+    response = client.get("/api/v1/characters", params={"affiliation": "cla"})
+    assert {c["id"] for c in response.json()} == {"ayaka", "thoma"}
+
+def test_search_by_name(client):
+    response = client.get("/api/v1/characters", params={"q": "HU TAO"})
+    assert [c["id"] for c in response.json()] == ["hu-tao"]
+
+def test_combined_text_and_enum_filters(client):
+    response = client.get("/api/v1/characters", params={"combat_role": "main dps", "region": "Inazuma"})
+    assert [c["id"] for c in response.json()] == ["ayaka"]

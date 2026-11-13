@@ -30,15 +30,16 @@ def client():
     """Cria um cliente de teste com repositório para a aplicação FastAPI."""
     fake_repo = CharacterRepository(
         [
-            make_character(id="diluc", name="Diluc", weapon_type="Claymore", rarity=5),
+            make_character(id="diluc", name="Diluc", weapon_type="Claymore", rarity=5,
+                           combat_role="Main DPS", affiliation="Adega Dawn"),
             make_character(id="barbara", name="Barbara", vision="Hydro",
-                           weapon_type="Catalyst"),
+                           weapon_type="Catalyst", combat_role="Healer/Suport"),
             make_character(id="hu-tao", name="Hu Tao", weapon_type="Polearm",
-                           rarity=5, region="Liyue"),
+                           rarity=5, region="Liyue", combat_role="Main DPS"),
             make_character(id="ayaka", name="Kamisato Ayaka", vision="Cryo",
-                           rarity=5, region="Inazuma"),
+                           rarity=5, region="Inazuma", combat_role="Main DPS", affiliation="Clã Kamisato"),
             make_character(id="thoma", name="Thoma", weapon_type="Polearm",
-                           region="Inazuma"),
+                           region="Inazuma", affiliation="Clã Kamisato"),
         ]
     )
     # Quando o endpoint pedir get_repository, o FastAPI entrega o falso
