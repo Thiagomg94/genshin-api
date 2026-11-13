@@ -1,79 +1,76 @@
 # API Genshin Impact
 
-API REST construída com **Python** e **FastAPI** que retorna informações sobre personagens do jogo *Genshin Impact*, com busca por filtros (por exemplo, listar os personagens de Inazuma).
+API REST construída com **Python** e **FastAPI** que retorna informações sobre personagens de *Genshin Impact*, com filtros por região, elemento, arma, raridade, função em combate, afiliação e busca por nome.
 
-> 🚧 **Projeto em desenvolvimento.** Veja o [status](#status-do-projeto) para saber o que já funciona e o que falta.
+> Projeto de fãs, sem fins lucrativos e sem vínculo com a HoYoverse.
+> Genshin Impact e todos os seus personagens e nomes pertencem à HoYoverse.
 
 ## Tecnologias
 
-- Python 3.10+
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Pydantic](https://docs.pydantic.dev/) (validação dos dados)
-- Uvicorn (servidor)
-- Pytest + HTTPX (testes)
+- Python 3.11+
+- [FastAPI](https://fastapi.tiangolo.com/) e Uvicorn
+- [Pydantic](https://docs.pydantic.dev/) e pydantic-settings (validação e configurações)
+- Pytest e httpx2 (testes)
 
 ## Status do projeto
 
 **Concluído**
-- [x] Estrutura de pastas em camadas
-- [x] Schema do personagem (`app/schemas/character.py`)
-- [x] Base de dados inicial em JSON, com 117 personagens (`app/data/characters.json`)
-- [x] Repositório com leitura do JSON e filtros (`app/repositories/character_repository.py`)
-- [x] Endpoints de personagens: listagem com filtros e paginação, e busca por id (`app/api/v1/endpoints/characters.py`)
-
-**Em andamento / próximos passos**
-- [x] Registrar o router da v1 no `main.py` (`app/api/v1/router.py`)
-- [x] Camada de serviço com as regras de negócio (`app/services/`)
-- [ ] Configurações centralizadas com variáveis de ambiente (`app/core/config.py`)
-- [ ] Tratamento global de erros (`app/core/exceptions.py`)
+- [x] Arquitetura em camadas (endpoint → serviço → repositório → dados)
+- [x] Base de dados em JSON com 117 personagens
+- [x] Endpoints de listagem (com filtros e paginação) e busca por id
+- [x] `Enum` para região, elemento e arma, com validação e lista suspensa no Swagger
+- [x] Filtros de texto parciais, que ignoram maiúsculas e acentos
+- [x] Configurações centralizadas e leitura de variáveis de ambiente
+- [x] Tratamento global de erros (404 padronizado)
 - [x] Testes automatizados com pytest
-- [ ] Usar `Enum` para região, elemento e arma, com validação e lista suspensa no Swagger
-- [ ] Mais filtros: função em combate, afiliação e busca por nome
-- [ ] Futuro: migrar de JSON para SQLite + SQLAlchemy
+
+**Próximos passos**
+- [ ] Rota que lista os valores disponíveis para cada filtro
+- [ ] Resposta paginada com o total de resultados
+- [ ] Migrar de JSON para SQLite + SQLAlchemy
 
 ## Estrutura do projeto
 
 ```
 genshin-api/
 ├── app/
-│   ├── main.py                    # Cria o FastAPI e registra os routers
-│   ├── core/                      # Configurações e exceções globais
+│   ├── main.py                       # Cria o FastAPI, registra routers e handlers de erro
+│   ├── core/
+│   │   ├── config.py                 # Configurações (pydantic-settings)
+│   │   └── exceptions.py             # Exceções do domínio e handlers globais
 │   ├── api/
-│   │   ├── deps.py                # Dependências injetáveis
+│   │   ├── deps.py                   # Dependências injetáveis (repositório e serviço)
 │   │   └── v1/
-│   │       ├── router.py          # Agrega os routers da v1
+│   │       ├── router.py             # Agrega os routers da v1
 │   │       └── endpoints/
-│   │           └── characters.py  # Rotas de personagens
+│   │           └── characters.py     # Rotas de personagens
 │   ├── schemas/
-│   │   └── character.py           # Modelos Pydantic
+│   │   └── character.py             # Modelos Pydantic e Enums
 │   ├── services/
-│   │   └── character_service.py   # Regras de negócio
+│   │   └── character_service.py     # Regras de negócio (paginação, erros)
 │   ├── repositories/
-│   │   └── character_repository.py  # Acesso aos dados (JSON hoje, banco no futuro)
+│   │   └── character_repository.py  # Acesso aos dados e filtros
 │   └── data/
-│       └── characters.json        # Dados dos personagens
-├── tests/                         # Testes automatizados (pytest)
-├── .env.example                   # Modelo de variáveis de ambiente
+│       └── characters.json          # Dados dos personagens
+├── tests/                            # Testes automatizados
+├── .env.example                      # Modelo de variáveis de ambiente
 ├── requirements.txt
 ├── CLAUDE.md
 └── README.md
 ```
 
-A requisição passa pelas camadas nesta ordem: **endpoint → serviço → repositório → dados**. Cada camada tem uma responsabilidade, então trocar o JSON por um banco no futuro exige mudar apenas o repositório.
+Cada camada só conhece a de baixo. Trocar o JSON por um banco no futuro exige alterar apenas o repositório.
 
 ## Instalação
 
 ```bash
-# 1. Clone o repositório
 git clone https://github.com/Thiagomg94/genshin-api.git
 cd genshin-api
 
-# 2. Crie e ative o ambiente virtual
-python -m venv venv
-source venv/bin/activate        # Linux/macOS
-venv\Scripts\activate           # Windows
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+source .venv/bin/activate       # Linux/macOS
 
-# 3. Instale as dependências
 pip install -r requirements.txt
 ```
 
@@ -84,35 +81,55 @@ uvicorn app.main:app --reload
 ```
 
 - API: http://localhost:8000
-- Documentação interativa (Swagger): http://localhost:8000/docs
+- Swagger (documentação interativa): http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-### Filtros de `/characters`
+## Endpoints
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/` | Verifica se a API está no ar |
+| GET | `/api/v1/characters` | Lista personagens, com filtros e paginação |
+| GET | `/api/v1/characters/{id}` | Retorna um personagem pelo id (ex.: `hu-tao`) |
+
+### Filtros de `/api/v1/characters`
+
+Todos são opcionais e podem ser combinados.
 
 | Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
-| `region` | texto | Região (ex.: `Inazuma`) |
-| `vision` | texto | Elemento (ex.: `Cryo`) |
-| `weapon_type` | texto | Tipo de arma (ex.: `Polearm`) |
+| `region` | enum | `Mondstadt`, `Liyue`, `Inazuma`, `Sumeru`, `Fontaine`, `Natlan`, `Nod-Krai`, `Snezhnaya` |
+| `vision` | enum | `Anemo`, `Cryo`, `Dendro`, `Electro`, `Geo`, `Hydro`, `Pyro` |
+| `weapon_type` | enum | `Sword`, `Claymore`, `Polearm`, `Bow`, `Catalyst` |
 | `rarity` | 4 ou 5 | Raridade em estrelas |
-| `limit` | inteiro | Itens por página (padrão 20, máximo 100) |
+| `combat_role` | texto | Busca parcial na função em combate (ex.: `healer`) |
+| `affiliation` | texto | Busca parcial na afiliação (ex.: `favonius`) |
+| `q` | texto | Busca parcial no nome ou título (ex.: `raiden`) |
+| `limit` | inteiro | Itens por página (padrão 10, máximo 100) |
 | `offset` | inteiro | Quantos itens pular (padrão 0) |
 
-Os filtros são opcionais e podem ser combinados.
+Valores de enum e buscas de texto ignoram maiúsculas e minúsculas. As buscas de texto também ignoram acentos.
 
-### Exemplos de requisição
+### Exemplos
 
 ```bash
-# Todos os personagens de Inazuma
-curl "http://localhost:8000/characters?region=Inazuma"
+# Personagens de Inazuma
+curl "http://localhost:8000/api/v1/characters?region=Inazuma"
 
 # Personagens Cryo de 5 estrelas
-curl "http://localhost:8000/characters?vision=Cryo&rarity=5"
+curl "http://localhost:8000/api/v1/characters?vision=Cryo&rarity=5"
+
+# Curandeiros dos Cavaleiros de Favonius
+curl "http://localhost:8000/api/v1/characters?combat_role=healer&affiliation=favonius"
+
+# Busca por nome
+curl "http://localhost:8000/api/v1/characters?q=raiden"
 
 # Um personagem específico
-curl "http://localhost:8000/characters/hu-tao"
+curl "http://localhost:8000/api/v1/characters/hu-tao"
 ```
 
-### Exemplo de resposta
+### Exemplo de resposta (`/characters/hu-tao`)
 
 ```json
 {
@@ -130,12 +147,35 @@ curl "http://localhost:8000/characters/hu-tao"
 }
 ```
 
+### Erros
+
+| Código | Quando acontece |
+|--------|-----------------|
+| 404 | Personagem não encontrado: `{"detail": "Personagem 'xyz' não encontrado."}` |
+| 422 | Parâmetro inválido (região inexistente, `rarity` fora de 4 e 5, etc.) |
+
+## Configuração
+
+Os valores padrão ficam em `app/core/config.py`. Para alterá-los, copie `.env.example` para `.env` e edite:
+
+```
+APP_NAME=API Genshin Impact
+APP_VERSION=0.1.0
+API_V1_PREFIX=/api/v1
+```
+
 ## Testes
 
 ```bash
-pytest
+pytest -v
 ```
+
+Os testes usam um repositório falso com poucos personagens, sem depender do `characters.json`.
 
 ## Cadastro de personagens
 
-Por enquanto a API é somente leitura. Novos personagens são adicionados editando `app/data/characters.json`, seguindo o formato de um personagem existente. O `id` deve ser único.
+A API é somente leitura. Para adicionar um personagem, edite `app/data/characters.json` seguindo o formato de um existente. O `id` deve ser único, e `region`, `vision` e `weapon_type` precisam ser valores aceitos pelos enums em `app/schemas/character.py`.
+
+## Licença
+
+Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
