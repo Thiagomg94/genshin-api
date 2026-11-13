@@ -17,12 +17,21 @@ class CharacterService:
         vision: Vision | None = None,
         weapon_type: WeaponType | None = None,
         rarity: int | None = None,
+        combat_role: str | None = None,
+        affiliation: str | None = None,
+        q: str | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> list[Character]:
         """Filtra personagens e devolve só a página pedida."""
         found = self._repository.search(
-            region=region, vision=vision, weapon_type=weapon_type, rarity=rarity
+            region=region,
+            vision=vision,
+            weapon_type=weapon_type,
+            rarity=rarity,
+            combat_role=combat_role,
+            affiliation=affiliation,
+            q=q
         )
         # Paginação: pega uma fatia da lista filtrada
         return found[offset : offset + limit]
