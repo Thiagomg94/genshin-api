@@ -51,4 +51,8 @@ def test_get_by_id_not_found(client):
 def test_invalid_rarity(client):
     response = client.get("/api/v1/characters", params={"rarity": 6})
     assert response.status_code == 422
+
+def test_invalid_region_returns_422(client):
+    response = client.get("/api/v1/characters", params={"region": "Atlantis"})
+    assert response.status_code == 422
     
