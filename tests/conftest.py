@@ -33,7 +33,7 @@ def client():
             make_character(id="diluc", name="Diluc", weapon_type="Claymore", rarity=5,
                            combat_role="Main DPS", affiliation="Adega Dawn"),
             make_character(id="barbara", name="Barbara", vision="Hydro",
-                           weapon_type="Catalyst", combat_role="Healer/Suport"),
+                           weapon_type="Catalyst", combat_role="Healer/Support"),
             make_character(id="hu-tao", name="Hu Tao", weapon_type="Polearm",
                            rarity=5, region="Liyue", combat_role="Main DPS"),
             make_character(id="ayaka", name="Kamisato Ayaka", vision="Cryo",
