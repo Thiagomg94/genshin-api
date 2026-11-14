@@ -1,5 +1,7 @@
 """Testes para os endpoints de personagens."""
 
+from app.schemas.character import Region, Vision, WeaponType
+
 def test_root(client):
     """Testa o endpoint raiz."""
     response = client.get("/")
@@ -72,3 +74,23 @@ def test_search_by_name(client):
 def test_combined_text_and_enum_filters(client):
     response = client.get("/api/v1/characters", params={"combat_role": "main dps", "region": "Inazuma"})
     assert [c["id"] for c in response.json()] == ["ayaka"]
+
+def test_filters_route_returns_available_values(client):
+    response = client.get("/api/v1/characters/filters")
+    assert response.status_code == 200
+
+    body = response.json()
+    # Enums seguem a ordem declarada no schema, e só entram valores presentes
+    assert body["regions"] == [r.value for r in Region if r.value in {"Mondstadt", "Liyue", "Inazuma"}]
+    assert body["visions"] == [v.value for v in Vision if v.value in {"Cryo", "Hydro", "Pyro"}]
+    assert body["weapon_types"] == [wt.value for wt in WeaponType if wt.value in {"Sword", "Claymore", "Polearm", "Catalyst"}]
+    assert body["rarities"] == [4, 5]
+
+def test_filters_route_returns_combat_roles_split(client):
+    response = client.get("/api/v1/characters/filters")
+    roles = response.json()["combat_roles"]
+
+    # "Healer/Support" deve virar duas funções separadas
+    assert roles == ["Healer", "Main DPS", "Support"]
+    assert "Healer/Support" not in roles   
+    
