@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import unicodedata
 
-from app.schemas.character import Character, Region, Vision, WeaponType
+from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions
 
 def _normalize(text: str) -> str:
     """Remove acentos e transforma em minúsculas"""
@@ -66,5 +66,31 @@ class CharacterRepository:
                 item for item in results 
                 if term in _normalize(item.name) or term in _normalize(item.title)
             ]
-            
+
         return results
+
+    def filter_options(self) -> FilterOptions:
+        """Calcula os valores que existem nos dados para cada filtro.
+
+        Só entram valores com ao menos um personagem. Região, elemento e arma
+        seguem a ordem em que o enum foi declarado (a ordem do jogo).
+        """
+
+        region = {c.region for c in self._characters}
+        vision = {c.vision for c in self._characters}
+        weapon_type = {c.weapon_type for c in self._characters}
+
+        roles = {
+            role.strip()
+            for item in self._characters
+            for role in item.combat_role.split("/")
+        }
+
+        return FilterOptions(
+            regions=[r for r in Region if r in region],
+            visions=[v for v in Vision if v in vision],
+            weapon_types=[w for w in WeaponType if w in weapon_type],
+            rarities=sorted({c.rarity for c in self._characters}),
+            combat_roles=sorted(roles),
+        )
+        

@@ -1,6 +1,6 @@
 """Regras de negócio dos personagens."""
 from app.repositories.character_repository import CharacterRepository
-from app.schemas.character import Character
+from app.schemas.character import Character, FilterOptions, Region, Vision, WeaponType
 from app.core.exceptions import CharacterNotFoundError
 from app.schemas.character import Character, Region, Vision, WeaponType
 
@@ -42,3 +42,7 @@ class CharacterService:
         if character is None:
             raise CharacterNotFoundError(character_id)
         return character
+
+    def get_filter_options(self) -> FilterOptions:
+        """Calcula os valores que existem nos dados para cada filtro."""
+        return self._repository.filter_options()

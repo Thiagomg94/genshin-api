@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_character_service
 from app.services.character_service import CharacterService
-from app.schemas.character import Character, Region, Vision, WeaponType
+from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions
 
 router = APIRouter(prefix="/characters", tags=["Personagens"])
 
@@ -34,11 +34,17 @@ def list_characters(
         offset=offset,
     )
 
+@router.get("/filters", response_model=FilterOptions)
+def get_filters(
+    service: CharacterService = Depends(get_character_service),
+):
+    """Lista os valores disponíveis para cada filtro."""
+    return service.get_filter_options()
 
 @router.get("/{character_id}", response_model=Character)
 def get_character(
-        character_id: str,
-        service: CharacterService = Depends(get_character_service),
+    character_id: str,
+    service: CharacterService = Depends(get_character_service),
 ):
     """Busca um personagem pelo id. Retorna 404 se não existir."""
     return service.get_character(character_id)

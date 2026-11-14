@@ -56,3 +56,10 @@ class Character(BaseModel):
     constellation: str | None = None
     affiliation: str
     description: str
+
+class FilterOptions(BaseModel):
+    regions: list[Region] = Field(default=None, description="Lista de regiões para filtrar")
+    visions: list[Vision] = Field(default=None, description="Lista de visões para filtrar")
+    weapon_types: list[WeaponType] = Field(default=None, description="Lista de armas para filtrar")
+    rarities: list[int] = Field(default=None, description="Raridades existentes")
+    combat_roles: list[str] = Field(default=None, description="Funções de combate")
