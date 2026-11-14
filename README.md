@@ -23,9 +23,9 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [x] Configurações centralizadas e leitura de variáveis de ambiente
 - [x] Tratamento global de erros (404 padronizado)
 - [x] Testes automatizados com pytest
+- [x] Rota que lista os valores disponíveis para cada filtro
 
 **Próximos passos**
-- [ ] Rota que lista os valores disponíveis para cada filtro
 - [ ] Resposta paginada com o total de resultados
 - [ ] Migrar de JSON para SQLite + SQLAlchemy
 
@@ -91,6 +91,7 @@ uvicorn app.main:app --reload
 | GET | `/` | Verifica se a API está no ar |
 | GET | `/api/v1/characters` | Lista personagens, com filtros e paginação |
 | GET | `/api/v1/characters/{id}` | Retorna um personagem pelo id (ex.: `hu-tao`) |
+| GET | `/api/v1/characters/filters` | Lista os valores disponíveis para cada filtro |
 
 ### Filtros de `/api/v1/characters`
 
