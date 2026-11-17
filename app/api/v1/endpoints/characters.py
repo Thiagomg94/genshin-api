@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_character_service
 from app.services.character_service import CharacterService
-from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions
+from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions, CharacterPage
 
 router = APIRouter(prefix="/characters", tags=["Personagens"])
 
 
-@router.get("", response_model=list[Character])
+@router.get("", response_model=CharacterPage)
 def list_characters(
         region: Region | None = None,
         vision: Vision | None = None,

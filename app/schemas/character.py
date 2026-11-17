@@ -63,3 +63,10 @@ class FilterOptions(BaseModel):
     weapon_types: list[WeaponType] = Field(default=None, description="Lista de armas para filtrar")
     rarities: list[int] = Field(default=None, description="Raridades existentes")
     combat_roles: list[str] = Field(default=None, description="Funções de combate")
+
+class CharacterPage(BaseModel):
+    """"Resposta paginada da listagem de personagens."""
+    total: int = Field(description="Total de personagens após aplicar filtros.")
+    limit: int = Field(description="Limite de personagens por página")
+    offset: int = Field(description="Quantos itens foram pulados")
+    characters: list[Character] = Field(description="Personagens da página atual.")

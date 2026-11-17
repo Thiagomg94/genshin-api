@@ -1,6 +1,6 @@
 """Regras de negócio dos personagens."""
 from app.repositories.character_repository import CharacterRepository
-from app.schemas.character import Character, FilterOptions, Region, Vision, WeaponType
+from app.schemas.character import Character, FilterOptions, Region, Vision, WeaponType, CharacterPage
 from app.core.exceptions import CharacterNotFoundError
 from app.schemas.character import Character, Region, Vision, WeaponType
 
@@ -22,8 +22,8 @@ class CharacterService:
         q: str | None = None,
         limit: int = 20,
         offset: int = 0,
-    ) -> list[Character]:
-        """Filtra personagens e devolve só a página pedida."""
+    ) -> CharacterPage:
+        """Filtra personagens e devolve a página pedida."""
         found = self._repository.search(
             region=region,
             vision=vision,
@@ -34,7 +34,12 @@ class CharacterService:
             q=q
         )
         # Paginação: pega uma fatia da lista filtrada
-        return found[offset : offset + limit]
+        return CharacterPage(
+            total=len(found),
+            limit=limit,
+            offset=offset,
+            characters=found[offset:offset + limit]
+        )
 
     def get_character(self, character_id: str) -> Character:
         """Busca por ID. Devolve CharacterNotFoundError se não existir."""
