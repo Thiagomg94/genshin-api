@@ -12,33 +12,33 @@ def test_list_all(client):
     """Testa o endpoint de listagem de personagens."""
     response = client.get("/api/v1/characters")
     assert response.status_code == 200
-    assert len(response.json()) == 5
+    assert len(response.json()["characters"]) == 5
 
 def test_filter_by_region(client):
     response = client.get("/api/v1/characters", params={"region": "Inazuma"})
-    ids = {c["id"] for c in response.json()}
+    ids = {c["id"] for c in response.json()["characters"]}
     assert ids == {"ayaka", "thoma"}
 
 def test_filter_ignores_case(client):
     response = client.get("/api/v1/characters", params={"region": "inazuma"})
-    assert len(response.json()) == 2
+    assert len(response.json()["characters"]) == 2
 
 def test_combined_filters(client):
     response = client.get("/api/v1/characters", params={"region": "Inazuma", "vision": "cryo"})
-    assert [c["id"] for c in response.json()] == ["ayaka"]
+    assert [c["id"] for c in response.json()["characters"]] == ["ayaka"]
 
 def test_filter_by_rarity(client):
     response = client.get("/api/v1/characters", params={"rarity": 5})
-    assert len(response.json()) == 3
+    assert len(response.json()["characters"]) == 3
 
 def test_without_results(client):
     response = client.get("/api/v1/characters", params={"region": "Natlan"})
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json()["characters"] == []
 
 def test_pagination(client):
     response = client.get("/api/v1/characters", params={"limit": 2, "offset": 4})
-    assert len(response.json()) == 1 # Pula 4 e sobra 1
+    assert len(response.json()["characters"]) == 1 # Pula 4 e sobra 1
 
 def test_get_by_id(client):
     response = client.get("/api/v1/characters/diluc")
@@ -60,20 +60,20 @@ def test_invalid_region_returns_422(client):
 
 def test_by_combat_role_partial(client):
     response = client.get("/api/v1/characters", params={"combat_role": "healer"})
-    assert [c["id"] for c in response.json()] == ["barbara"]
+    assert [c["id"] for c in response.json()["characters"]] == ["barbara"]
 
 def test_filter_by_affiliation_ignores_accents(client):
     # "cla" sem acento deve encontrar "Clã Kamisato"
     response = client.get("/api/v1/characters", params={"affiliation": "cla"})
-    assert {c["id"] for c in response.json()} == {"ayaka", "thoma"}
+    assert {c["id"] for c in response.json()["characters"]} == {"ayaka", "thoma"}
 
 def test_search_by_name(client):
     response = client.get("/api/v1/characters", params={"q": "HU TAO"})
-    assert [c["id"] for c in response.json()] == ["hu-tao"]
+    assert [c["id"] for c in response.json()["characters"]] == ["hu-tao"]
 
 def test_combined_text_and_enum_filters(client):
     response = client.get("/api/v1/characters", params={"combat_role": "main dps", "region": "Inazuma"})
-    assert [c["id"] for c in response.json()] == ["ayaka"]
+    assert [c["id"] for c in response.json()["characters"]] == ["ayaka"]
 
 def test_filters_route_returns_available_values(client):
     response = client.get("/api/v1/characters/filters")
@@ -94,3 +94,21 @@ def test_filters_route_returns_combat_roles_split(client):
     assert roles == ["Healer", "Main DPS", "Support"]
     assert "Healer/Support" not in roles   
     
+def test_list_returns_pagination_info(client):
+    body = client.get("/api/v1/characters", params={"limit": 2, "offset": 1}).json()
+    assert body["total"] == 5
+    assert body["limit"] == 2
+    assert body["offset"] == 1
+    assert len(body["characters"]) == 2
+
+def test_total_counts_all_filtered_results_not_just_the_page(client):
+    body = client.get(
+        "/api/v1/characters", params={"region": "Inazuma", "limit": 1}
+    ).json()
+    assert body["total"] == 2 # os dois de Inazuma, mesmo com limit=1
+    assert len(body["characters"]) == 1
+
+def test_offset_beyond_total_returns_empty_items(client):
+    body = client.get("/api/v1/characters", params={"offset": 100}).json()
+    assert body["total"] == 5
+    assert body["characters"] == []
