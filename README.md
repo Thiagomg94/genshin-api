@@ -1,6 +1,6 @@
 # API Genshin Impact
 
-API REST construída com **Python** e **FastAPI** que retorna informações sobre personagens de *Genshin Impact*, com filtros por região, elemento, arma, raridade, função em combate, afiliação e busca por nome.
+API REST construída com **Python** e **FastAPI** que retorna informações sobre personagens de _Genshin Impact_, com filtros por região, elemento, arma, raridade, função em combate, afiliação e busca por nome.
 
 > Projeto de fãs, sem fins lucrativos e sem vínculo com a HoYoverse.
 > Genshin Impact e todos os seus personagens e nomes pertencem à HoYoverse.
@@ -15,6 +15,7 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 ## Status do projeto
 
 **Concluído**
+
 - [x] Arquitetura em camadas (endpoint → serviço → repositório → dados)
 - [x] Base de dados em JSON com 117 personagens
 - [x] Endpoints de listagem (com filtros e paginação) e busca por id
@@ -26,7 +27,8 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [x] Rota que lista os valores disponíveis para cada filtro
 
 **Próximos passos**
-- [ ] Resposta paginada com o total de resultados
+
+- [x] Resposta paginada com o total de resultados
 - [ ] Migrar de JSON para SQLite + SQLAlchemy
 
 ## Estrutura do projeto
@@ -86,28 +88,28 @@ uvicorn app.main:app --reload
 
 ## Endpoints
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/` | Verifica se a API está no ar |
-| GET | `/api/v1/characters` | Lista personagens, com filtros e paginação |
-| GET | `/api/v1/characters/{id}` | Retorna um personagem pelo id (ex.: `hu-tao`) |
-| GET | `/api/v1/characters/filters` | Lista os valores disponíveis para cada filtro |
+| Método | Rota                         | Descrição                                     |
+| ------ | ---------------------------- | --------------------------------------------- |
+| GET    | `/`                          | Verifica se a API está no ar                  |
+| GET    | `/api/v1/characters`         | Lista personagens, com filtros e paginação (devolve o total de resultados) |
+| GET    | `/api/v1/characters/{id}`    | Retorna um personagem pelo id (ex.: `hu-tao`) |
+| GET    | `/api/v1/characters/filters` | Lista os valores disponíveis para cada filtro |
 
 ### Filtros de `/api/v1/characters`
 
 Todos são opcionais e podem ser combinados.
 
-| Parâmetro | Tipo | Descrição |
-|-----------|------|-----------|
-| `region` | enum | `Mondstadt`, `Liyue`, `Inazuma`, `Sumeru`, `Fontaine`, `Natlan`, `Nod-Krai`, `Snezhnaya` |
-| `vision` | enum | `Anemo`, `Cryo`, `Dendro`, `Electro`, `Geo`, `Hydro`, `Pyro` |
-| `weapon_type` | enum | `Sword`, `Claymore`, `Polearm`, `Bow`, `Catalyst` |
-| `rarity` | 4 ou 5 | Raridade em estrelas |
-| `combat_role` | texto | Busca parcial na função em combate (ex.: `healer`) |
-| `affiliation` | texto | Busca parcial na afiliação (ex.: `favonius`) |
-| `q` | texto | Busca parcial no nome ou título (ex.: `raiden`) |
-| `limit` | inteiro | Itens por página (padrão 10, máximo 100) |
-| `offset` | inteiro | Quantos itens pular (padrão 0) |
+| Parâmetro     | Tipo    | Descrição                                                                                |
+| ------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `region`      | enum    | `Mondstadt`, `Liyue`, `Inazuma`, `Sumeru`, `Fontaine`, `Natlan`, `Nod-Krai`, `Snezhnaya` |
+| `vision`      | enum    | `Anemo`, `Cryo`, `Dendro`, `Electro`, `Geo`, `Hydro`, `Pyro`                             |
+| `weapon_type` | enum    | `Sword`, `Claymore`, `Polearm`, `Bow`, `Catalyst`                                        |
+| `rarity`      | 4 ou 5  | Raridade em estrelas                                                                     |
+| `combat_role` | texto   | Busca parcial na função em combate (ex.: `healer`)                                       |
+| `affiliation` | texto   | Busca parcial na afiliação (ex.: `favonius`)                                             |
+| `q`           | texto   | Busca parcial no nome ou título (ex.: `raiden`)                                          |
+| `limit`       | inteiro | Itens por página (padrão 10, máximo 100)                                                 |
+| `offset`      | inteiro | Quantos itens pular (padrão 0)                                                           |
 
 Valores de enum e buscas de texto ignoram maiúsculas e minúsculas. As buscas de texto também ignoram acentos.
 
@@ -147,13 +149,26 @@ curl "http://localhost:8000/api/v1/characters/hu-tao"
   "description": "77ª diretora da Casa Funerária Wangsheng, responsável pelos ritos funerários de Liyue."
 }
 ```
+### Exemplo de resposta (`/characters?region=Inazuma&limit=2`)
+
+```json
+{
+  "total": 17,
+  "limit": 2,
+  "offset": 0,
+  "items": [
+    { "id": "arataki-itto", "name": "Arataki Itto", "...": "..." },
+    { "id": "ayaka", "name": "Kamisato Ayaka", "...": "..." }
+  ]
+}
+```
 
 ### Erros
 
-| Código | Quando acontece |
-|--------|-----------------|
-| 404 | Personagem não encontrado: `{"detail": "Personagem 'xyz' não encontrado."}` |
-| 422 | Parâmetro inválido (região inexistente, `rarity` fora de 4 e 5, etc.) |
+| Código | Quando acontece                                                             |
+| ------ | --------------------------------------------------------------------------- |
+| 404    | Personagem não encontrado: `{"detail": "Personagem 'xyz' não encontrado."}` |
+| 422    | Parâmetro inválido (região inexistente, `rarity` fora de 4 e 5, etc.)       |
 
 ## Configuração
 
