@@ -1,4 +1,4 @@
-"""Componentes visuais reutilizáveis."""
+"""Interface visual da API Genshin Impact (NiceGUI)."""
 from nicegui import ui
 
 from theme import vision_color
