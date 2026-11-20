@@ -5,10 +5,11 @@ from dataclasses import dataclass
 from nicegui import ui
 
 from api_client import ApiError, fetch_characters, fetch_filter_options
-from components import character_card
+from components import character_card, character_detail
 
 # Quantos cartões aparecem por página
 PAGE_SIZE = 12
+
 
 @dataclass
 class SearchState:
@@ -23,13 +24,22 @@ class SearchState:
     data: dict | None = None # última resposta da API
     error: str | None = None # mensagem de erro, se a busca falhou
     request_id: int = 0 # numera as buscas, para descastar respostas antigas
+    selected: dict | None = None # personagem aberto na janela de detalhe
 
 
 # response_timeout: tempo máximo (em segundos) para montar a página
 @ui.page("/", response_timeout=15)
 async def index() -> None:
     """Página inicial: filtros, cartões de personagens e paginação."""
-    ui.label("API Genshin Impact").classes("text-h4")
+    dark = ui.dark_mode()
+
+    # Cabeçalho
+    with ui.row().classes("w-full items-center justify-between"):
+        ui.label("API Genshin Impact").classes("text-h4")
+        ui.switch(
+            "Tema escuro",
+            on_change=lambda e: dark.enable() if e.value else dark.disable(),
+        )
 
     try:
         # Os valores das listas suspensas vêm da rota /characters/filters
@@ -47,9 +57,6 @@ async def index() -> None:
         state.request_id += 1
         request_id = state.request_id
         offset = (state.page - 1) * PAGE_SIZE
-        print(f"[load #{request_id}] page={state.page} "
-              f"offset={(state.page - 1) * PAGE_SIZE} "
-              f"filtros=({state.region}, {state.vision}, {state.weapon_type}, {state.rarity}, {state.q})")
         try:
             data = await fetch_characters(
                 q=state.q,
@@ -64,7 +71,6 @@ async def index() -> None:
         except ApiError as exc:
             data, error = None, str(exc)
 
-
         # Se o usuário já pediu outra busca enquanto esta esperava, descarta esta
         if request_id != state.request_id:
             return
@@ -73,7 +79,6 @@ async def index() -> None:
 
     async def change_filter(name: str, value) -> None:
         """Atualiza um filtro, volta para a página 1 e busca novamente."""
-        print(f"[change_filter] {name} = {value!r}")
         # Campo limpo ('' ou None) significa 'sem filtro'
         setattr(state, name, value or None)
         state.page = 1
@@ -81,11 +86,27 @@ async def index() -> None:
 
     async def change_page(page: int) -> None:
         """Vai para outra página dos resultados."""
-        print(f"[change_page] recebeu {page!r} ({type(page).__name__}); estado atual = {state.page}")
         if page == state.page:  # evita buscar de novo sem necessidade
             return
         state.page = page
         await load()
+
+    @ui.refreshable
+    def detail_view() -> None:
+        """Conteúdo da janela de detalhe, a partir do personagem selecionado."""
+        if state.selected is not None:
+            character_detail(state.selected, on_close=detail_dialog.close)
+
+    def show_detail(character: dict) -> None:
+        """Guarda o personagem clicado, redesenha a janela e a abre."""
+        state.selected = character
+        detail_view.refresh()
+        detail_dialog.open()
+
+    # Janela única, reaproveitada a cada clique em um cartão
+    with ui.dialog() as detail_dialog:
+        with ui.card().classes("w-96"):
+            detail_view()
 
     @ui.refreshable
     def results() -> None:
@@ -105,7 +126,7 @@ async def index() -> None:
 
         with ui.grid(columns="repeat(auto-fill, minmax(260px, 1fr))").classes("w-full gap-4"):
             for character in state.data["characters"]:
-                character_card(character)
+                character_card(character, on_click=show_detail)
 
         # Número de páginas = total / tamanho da página, arredondado para cima
         pages = math.ceil(total / PAGE_SIZE)
