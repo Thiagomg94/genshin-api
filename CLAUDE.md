@@ -4,7 +4,7 @@
 
 - **O que é:** Uma API que retorna ao usuário dados sobre personagens de Genshin Impact.
 - **Público-alvo:** Qualquer pessoa que jogue Genshin Impact, sem restrições de idade.
-- **Objetivo Atual:** Evoluir a API já funcional (listagem com filtros e busca por id): rota de valores disponíveis para os filtros, resposta paginada com total e, depois, migração do JSON para SQLite.
+- **Objetivo Atual:** API e interface NiceGUI funcionais (filtros, busca, paginação, detalhe). Próximos passos: rota de estatísticas com gráficos na interface e, depois, migração do JSON para SQLite.
 
 ## 🛠️ Stack & Ambiente
 
@@ -13,6 +13,7 @@
 - **Bibliotecas:** Pydantic, pydantic-settings, Uvicorn
 - **Testes:** pytest e httpx2
 - **Dados:** `app/data/characters.json` (117 personagens), somente leitura
+- **Interface:** NiceGUI 4 (`ui/`), consome a API via `httpx2`
 
 ## 🏗️ Arquitetura
 
@@ -25,11 +26,19 @@ Fluxo da requisição: `endpoint → service → repository → dados`. Cada cam
 - `app/schemas/`: modelos Pydantic e Enums (`Region`, `Vision`, `WeaponType`)
 - `app/core/`: configurações (`config.py`) e erros globais (`exceptions.py`)
 - Rotas da v1 ficam sob `/api/v1`
+- `ui/`: interface NiceGUI, separada da API. Só conversa com ela por HTTP e nunca importa de `app/`
+  - `api_client.py`: chamadas assíncronas à API (`fetch_characters`, `fetch_filter_options`)
+  - `components.py`: componentes visuais (`character_card`, `character_detail`)
+  - `theme.py`: cores por elemento
+  - `main.py`: página, estado (`SearchState`) e eventos
 
 Convenções:
 - O serviço não usa `HTTPException`: levanta exceções do domínio, e o handler global converte em HTTP.
 - Filtros de texto são parciais e ignoram maiúsculas e acentos (`_normalize` no repositório).
 - Só o dono do projeto cadastra personagens, editando o JSON (sem endpoints de escrita).
+- Na interface, o estado da página fica em um `SearchState` (um por cliente) e a tela é redesenhada com `@ui.refreshable`.
+- Respostas antigas da API são descartadas com `request_id`.
+- Toda chamada à API na interface é `async` e trata `ApiError`.
 
 ## 🚀 Comandos Úteis
 
@@ -41,6 +50,9 @@ Convenções:
 - Testes: `pytest -v`
 - Docs interativas (Swagger): `http://localhost:8000/docs`
 - Docs alternativas (ReDoc): `http://localhost:8000/redoc`
+- Instalar dependências da interface: `pip install -r ui/requirements.txt`
+- Rodar a interface (com a API no ar): `python ui/main.py` → `http://localhost:8080`
+- Variável `API_BASE_URL` muda o endereço da API usado pela interface
 
 ## 🎯 Regras de Código (Guia da IA)
 
