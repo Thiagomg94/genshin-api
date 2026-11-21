@@ -11,6 +11,7 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [FastAPI](https://fastapi.tiangolo.com/) e Uvicorn
 - [Pydantic](https://docs.pydantic.dev/) e pydantic-settings (validação e configurações)
 - Pytest e httpx2 (testes)
+- **NiceGUI**: interface visual em Python que consome a API
 
 ## Status do projeto
 
@@ -25,40 +26,61 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [x] Tratamento global de erros (404 padronizado)
 - [x] Testes automatizados com pytest
 - [x] Rota que lista os valores disponíveis para cada filtro
+- [x] Resposta paginada com o total de resultados
+- [x] Interface visual com NiceGUI (cartões, filtros, busca, paginação, detalhe e tema escuro)
 
 **Próximos passos**
 
-- [x] Resposta paginada com o total de resultados
-- [ ] Migrar de JSON para SQLite + SQLAlchemy
+- [ ] Rota de estatísticas e gráficos
+- [ ] Migração do JSON para SQLite
 
 ## Estrutura do projeto
 
 ```
-genshin-api/
+Projeto API Genshin Impact/
 ├── app/
-│   ├── main.py                       # Cria o FastAPI, registra routers e handlers de erro
-│   ├── core/
-│   │   ├── config.py                 # Configurações (pydantic-settings)
-│   │   └── exceptions.py             # Exceções do domínio e handlers globais
+│   ├── __init__.py
+│   ├── main.py                      # ponto de entrada da API
 │   ├── api/
-│   │   ├── deps.py                   # Dependências injetáveis (repositório e serviço)
+│   │   ├── __init__.py
+│   │   ├── deps.py                  # injeção de dependências
 │   │   └── v1/
-│   │       ├── router.py             # Agrega os routers da v1
+│   │       ├── __init__.py
+│   │       ├── router.py            # agrupa as rotas da v1
 │   │       └── endpoints/
-│   │           └── characters.py     # Rotas de personagens
-│   ├── schemas/
-│   │   └── character.py             # Modelos Pydantic e Enums
-│   ├── services/
-│   │   └── character_service.py     # Regras de negócio (paginação, erros)
+│   │           ├── __init__.py
+│   │           └── characters.py    # rotas de personagens
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py                # configurações (pydantic-settings)
+│   │   └── exceptions.py            # exceções e handlers globais
+│   ├── data/
+│   │   └── characters.json          # dados dos 117 personagens
 │   ├── repositories/
-│   │   └── character_repository.py  # Acesso aos dados e filtros
-│   └── data/
-│       └── characters.json          # Dados dos personagens
-├── tests/                            # Testes automatizados
-├── .env.example                      # Modelo de variáveis de ambiente
-├── requirements.txt
+│   │   ├── __init__.py
+│   │   └── character_repository.py  # acesso aos dados e filtros
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── character.py             # modelos Pydantic e Enums
+│   └── services/
+│       ├── __init__.py
+│       └── character_service.py     # regras de negócio (paginação)
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py                  # fixtures (repositório fake e client)
+│   └── test_characters.py           # testes das rotas
+├── ui/
+│   ├── main.py                      # página NiceGUI (estado, filtros, paginação)
+│   ├── api_client.py                # chamadas assíncronas à API
+│   ├── components.py                # cartão e janela de detalhe
+│   ├── theme.py                     # cores por elemento
+│   └── requirements.txt             # dependências da interface
+├── .env.example
+├── .gitignore
 ├── CLAUDE.md
-└── README.md
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
 
 Cada camada só conhece a de baixo. Trocar o JSON por um banco no futuro exige alterar apenas o repositório.
@@ -85,6 +107,36 @@ uvicorn app.main:app --reload
 - API: http://localhost:8000
 - Swagger (documentação interativa): http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+## Interface visual (NiceGUI)
+
+A interface é uma aplicação separada que consome a API pelo HTTP. Por isso a API precisa estar no ar antes.
+
+**Terminal 1: API**
+```bash
+uvicorn app.main:app --reload
+```
+
+**Terminal 2: interface**
+```bash
+pip install -r ui/requirements.txt
+python ui/main.py
+```
+
+Abra `http://localhost:8080`.
+
+Recursos: cartões com cor por elemento e estrelas de raridade, busca por nome/título, filtros (região, elemento, arma, raridade), paginação, janela de detalhes ao clicar no cartão e tema escuro.
+
+### Configuração
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `API_BASE_URL` | `http://localhost:8000/api/v1` | Endereço base da API usado pela interface |
+
+No PowerShell, para apontar para outra API:
+```powershell
+$env:API_BASE_URL = "http://localhost:9000/api/v1"
+python ui/main.py
+```
 
 ## Endpoints
 
