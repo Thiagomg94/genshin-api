@@ -2,9 +2,10 @@
 
 import json
 from pathlib import Path
+from collections import Counter
 import unicodedata
 
-from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions
+from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions, CountItem, CharacterStats
 
 def _normalize(text: str) -> str:
     """Remove acentos e transforma em minúsculas"""
@@ -93,4 +94,30 @@ class CharacterRepository:
             rarities=sorted({c.rarity for c in self._characters}),
             combat_roles=sorted(roles),
         )
+
+    def stats(self) -> CharacterStats:
+        """Conta os personagens por região, elemento, arma e raridade.
         
+        Os grupos seguem a ordem dos Enums, e categorias sem nenhum
+        personagem aparecem com contagem 0.
+        """
+        characters = self._characters
+
+        # Counter passa pela lista e devolve {valor: quantidade}.
+        # .value converte o Enum em texto, porque o schema guarda o valor em str.
+        regions = Counter(c.region.value for c in characters)
+        visions = Counter(c.vision.value for c in characters)
+        weapons = Counter(c.weapon_type.value for c in characters)
+        rarities = Counter(str(c.rarity) for c in characters)
+
+        def to_items(counter: Counter, order: list[str]) -> list[CountItem]:
+            """Monta a lista na ordem desejada; Counter devolve 0 se faltar a chave."""
+            return [CountItem(label=label, count=counter[label]) for label in order]
+
+        return CharacterStats(
+            total=len(characters),
+            by_region=to_items(regions, [r.value for r in Region]),
+            by_vision=to_items(visions, [r.value for r in Vision]),
+            by_weapon_type=to_items(weapons, [r.value for r in WeaponType]),
+            by_rarity=to_items(rarities, ["4", "5"])
+        )

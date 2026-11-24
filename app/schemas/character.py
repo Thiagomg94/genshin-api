@@ -70,3 +70,18 @@ class CharacterPage(BaseModel):
     limit: int = Field(description="Limite de personagens por página")
     offset: int = Field(description="Quantos itens foram pulados")
     characters: list[Character] = Field(description="Personagens da página atual.")
+
+class CountItem(BaseModel):
+    """Uma categoria e quantos personagens pertecem a ela."""
+
+    label: str # nome da categoria (ex.: "Pyro")
+    count: int # quantidade de personagens nessa categoria
+
+class CharacterStats(BaseModel):
+    """Estatísticas agregadas do catálogo de personagens."""
+
+    total: int
+    by_region: list[CountItem]
+    by_vision: list[CountItem]
+    by_weapon_type: list[CountItem]
+    by_rarity: list[CountItem]

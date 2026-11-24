@@ -2,7 +2,7 @@
 from app.repositories.character_repository import CharacterRepository
 from app.schemas.character import Character, FilterOptions, Region, Vision, WeaponType, CharacterPage
 from app.core.exceptions import CharacterNotFoundError
-from app.schemas.character import Character, Region, Vision, WeaponType
+from app.schemas.character import Character, Region, Vision, WeaponType, CharacterStats
 
 
 class CharacterService:
@@ -51,3 +51,7 @@ class CharacterService:
     def get_filter_options(self) -> FilterOptions:
         """Calcula os valores que existem nos dados para cada filtro."""
         return self._repository.filter_options()
+
+    def get_stats(self) -> CharacterStats:
+        """Devolve estatísticas agregadas do catálogo."""
+        return self._repository.stats()
