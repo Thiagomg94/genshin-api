@@ -1,6 +1,6 @@
 """Testes para os endpoints de personagens."""
 
-from app.schemas.character import Region, Vision, WeaponType
+from app.schemas.character import Region, Vision, WeaponType, CaseInsensitiveEnum
 
 def test_root(client):
     """Testa o endpoint raiz."""
@@ -112,3 +112,22 @@ def test_offset_beyond_total_returns_empty_items(client):
     body = client.get("/api/v1/characters", params={"offset": 100}).json()
     assert body["total"] == 5
     assert body["characters"] == []
+
+def test_stats_route_not_shadowed_by_id(client):
+    response = client.get("/api/v1/characters/stats")
+    assert response.status_code == 200
+
+def test_status_groups_sum_to_total(client):
+    """Em cada grupo a soma dos grupos deve ser igual ao total."""
+    body = client.get("api/v1/characters/stats").json()
+    for group in ("by_region", "by_vision", "by_weapon_type", "by_rarity"):
+        assert sum(item["count"] for item in body[group]) == body["total"]
+
+def test_stats_follow_enum_order(client):
+    """Os rótulos seguem a ordem dos Enums e incluem categorias vazias."""
+    body = client.get("api/v1/characters/stats").json()
+    assert [i["label"] for i in body["by_region"]] == [r.value for r in Region]
+    assert [i["label"] for i in body["by_vision"]] == [r.value for r in Vision]
+    assert [i["label"] for i in body["by_weapon_type"]] == [r.value for r in WeaponType]
+    assert [i["label"] for i in body["by_rarity"]] == ["4", "5"]
+    
