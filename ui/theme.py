@@ -14,8 +14,12 @@ VISION_COLORS = {
 
 # Cor usada se aparecer um elemento que não está no dicionário acima
 DEFAULT_COLOR = "#9E9E9E"
+RARITY_COLOR = {"4": "#A256E1", "5": "#FFB13F"}
 
 
 def vision_color(vision: str) -> str:
     """Devolve a cor do elemento, ou a cor padrão se ele for desconhecido."""
     return VISION_COLORS.get(vision, DEFAULT_COLOR)
+
+def rarity_color(rarity: str) -> str:
+    return RARITY_COLOR.get(rarity, DEFAULT_COLOR)

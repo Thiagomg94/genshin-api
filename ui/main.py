@@ -6,6 +6,7 @@ from nicegui import ui
 
 from api_client import ApiError, fetch_characters, fetch_filter_options, fetch_stats
 from components import character_card, character_detail
+from theme import vision_color, rarity_color
 from charts import bar_options, donut_options
 
 # Quantos cartões aparecem por página
@@ -195,9 +196,9 @@ async def stats_page():
     with ui.grid(columns="repeat(auto-fit, minmax(380px, 1fr))").classes("w-full gap-4"):
         charts = [
             bar_options("Personagens por região", stats["by_region"]),
-            donut_options("Personagens por elemento", stats["by_vision"], by_vision=True),
+            donut_options("Personagens por elemento", stats["by_vision"], color_of=vision_color),
             bar_options("Personagens por arma", stats["by_weapon_type"]),
-            donut_options("Personagens por raridade (estrelas)", stats["by_rarity"]),
+            donut_options("Personagens por raridade (estrelas)", stats["by_rarity"], color_of=rarity_color),
         ]
         for options in charts:
             with ui.card():

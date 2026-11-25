@@ -1,5 +1,5 @@
 """Configurações dos gráficos usados na página de estatísticas."""
-from theme import vision_color
+from theme import vision_color, rarity_color
 
 
 TEXT_COLOR = "gray"
@@ -39,7 +39,7 @@ def bar_options(title: str, items: list[dict]) -> dict:
     }
 
 
-def donut_options(title: str, items: list[dict], by_vision: bool = False) -> dict:
+def donut_options(title: str, items: list[dict], color_of=None) -> dict:
     """Gráfico de rosca.
     
     Para os dados no gráfico de pizza é preciso uma lista de fatias.
@@ -49,9 +49,9 @@ def donut_options(title: str, items: list[dict], by_vision: bool = False) -> dic
     data = []
     for item in items:
         slice_ = {"name": item["label"], "value": item["count"]}
-        if by_vision:
+        if color_of:
             # itemStyle.color define a cor de uma fatia específica.
-            slice_["itemStyle"] = {"color": vision_color(item["label"])}
+            slice_["itemStyle"] = {"color": color_of(item["label"])}
         data.append(slice_)
 
     return {
