@@ -1,6 +1,8 @@
 """Testes para os endpoints de personagens."""
+import pytest
 
 from app.schemas.character import Region, Vision, WeaponType, CaseInsensitiveEnum
+from app.core.config import settings
 
 def test_root(client):
     """Testa o endpoint raiz."""
@@ -131,3 +133,15 @@ def test_stats_follow_enum_order(client):
     assert [i["label"] for i in body["by_weapon_type"]] == [r.value for r in WeaponType]
     assert [i["label"] for i in body["by_rarity"]] == ["4", "5"]
     
+@pytest.mark.parametrize("param", ["q", "combat_role", "affiliation"])
+def test_text_param_above_limit_returns_422(client, param):
+    too_long = "a" * (settings.max_text_length + 1)
+    response = client.get("api/v1/characters", params={param: too_long})
+    assert response.status_code == 422
+
+@pytest.mark.parametrize("param", ["q", "combat_role", "affiliation"])
+def test_text_at_limit_is_accepted(client, param):
+    text = "a" * settings.max_text_length
+    response = client.get("api/v1/characters", params={param: text})
+    assert response.status_code == 200
+    assert response.json()["total"] == 0
