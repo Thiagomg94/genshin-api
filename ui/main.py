@@ -4,8 +4,9 @@ from dataclasses import dataclass
 
 from nicegui import ui
 
-from api_client import ApiError, fetch_characters, fetch_filter_options
+from api_client import ApiError, fetch_characters, fetch_filter_options, fetch_stats
 from components import character_card, character_detail
+from charts import bar_options, donut_options
 
 # Quantos cartões aparecem por página
 PAGE_SIZE = 12
@@ -36,6 +37,7 @@ async def index() -> None:
     # Cabeçalho
     with ui.row().classes("w-full items-center justify-between"):
         ui.label("API Genshin Impact").classes("text-h4")
+        ui.link("📊 Estatísticas", "/estatisticas")
         ui.switch(
             "Tema escuro",
             on_change=lambda e: dark.enable() if e.value else dark.disable(),
@@ -170,6 +172,36 @@ async def index() -> None:
 
     results()    # desenha o estado inicial ("Carregando...")
     await load()  # busca a primeira página e redesenha
+
+
+@ui.page("/estatisticas", response_timeout=15)
+async def stats_page():
+    """Página com gráficos sobre a composição do catálogo de personagens."""
+    with ui.row().classes("w-full items-center justify-between"):
+        ui.label("Estatísticas").classes("text-2xl font-bold")
+        # Link de volta para a página principal.
+        ui.link("← Voltar aos personagens", "/")
+
+    # Busca os dados; se a API estiver fora do ar, mostra o erro e para por aqui.
+    try:
+        stats = await fetch_stats()
+    except ApiError as error:
+        ui.label(f"Não foi possível carregar as estatísticas: {error}").classes("text-negative")
+        return
+
+    ui.label(f"{stats['total']} personagens no catálogo").classes("text-gray-500")
+
+    # Grade que ajusta o número de colunas ao tamanho da tela.
+    with ui.grid(columns="repeat(auto-fit, minmax(380px, 1fr))").classes("w-full gap-4"):
+        charts = [
+            bar_options("Personagens por região", stats["by_region"]),
+            donut_options("Personagens por elemento", stats["by_vision"], by_vision=True),
+            bar_options("Personagens por arma", stats["by_weapon_type"]),
+            donut_options("Personagens por raridade (estrelas)", stats["by_rarity"]),
+        ]
+        for options in charts:
+            with ui.card():
+                ui.echart(options).classes("w-full h-72")
 
 
 ui.run(title="Genshin Impact")

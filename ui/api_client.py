@@ -37,6 +37,10 @@ async def fetch_filter_options() -> dict:
     return await _get("/characters/filters")
 
 
+async def fetch_stats() -> dict:
+    return await _get("/characters/stats")
+
+
 async def fetch_characters(
     *,
     region: str | None = None,
