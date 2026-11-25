@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     app_description: str = "API que retorna dados de personagens de Genshin Impact."
     app_version_api: str = "/api/v1"
     characters_data_path: Path = BASE_DIR / "data" / "characters.json"
+    max_text_length: int = 50
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from app.api.deps import get_character_service
 from app.services.character_service import CharacterService
 from app.schemas.character import Character, Region, Vision, WeaponType, FilterOptions, CharacterPage, CharacterStats
+from app.core.config import settings
 
 router = APIRouter(prefix="/characters", tags=["Personagens"])
 
@@ -14,9 +15,9 @@ def list_characters(
         vision: Vision | None = None,
         weapon_type: WeaponType | None = None,
         rarity: int | None = Query(None, ge=4, le=5),
-        combat_role: str | None = Query(None, description="Busca parcial. Ex.: healer"),
-        affiliation: str | None = Query(None, description="Busca parcial. Ex.: favonius"),
-        q: str | None = Query(None, description="Busca parcial no nome ou título"),
+        combat_role: str | None = Query(None, max_length=settings.max_text_length, description="Busca parcial. Ex.: healer"),
+        affiliation: str | None = Query(None, max_length=settings.max_text_length, description="Busca parcial. Ex.: favonius"),
+        q: str | None = Query(None, max_length=settings.max_text_length, description="Busca parcial no nome ou título"),
         limit: int = Query(10, ge=1, le=100),
         offset: int = Query(0, ge=0),
         service: CharacterService = Depends(get_character_service),
