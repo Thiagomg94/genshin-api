@@ -4,7 +4,7 @@
 
 - **O que é:** Uma API que retorna ao usuário dados sobre personagens de Genshin Impact.
 - **Público-alvo:** Qualquer pessoa que jogue Genshin Impact, sem restrições de idade.
-- **Objetivo Atual:** API e interface NiceGUI funcionais (filtros, busca, paginação, detalhe). Próximos passos: rota de estatísticas com gráficos na interface e, depois, migração do JSON para SQLite.
+- **Objetivo Atual:** Polimento da API e migração do JSON para SQLite.
 
 ## 🛠️ Stack & Ambiente
 
@@ -31,6 +31,7 @@ Fluxo da requisição: `endpoint → service → repository → dados`. Cada cam
   - `components.py`: componentes visuais (`character_card`, `character_detail`)
   - `theme.py`: cores por elemento
   - `main.py`: página, estado (`SearchState`) e eventos
+  - `charts.py`: configurações dos gráficos
 
 Convenções:
 - O serviço não usa `HTTPException`: levanta exceções do domínio, e o handler global converte em HTTP.

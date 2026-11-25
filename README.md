@@ -28,10 +28,10 @@ API REST construída com **Python** e **FastAPI** que retorna informações sobr
 - [x] Rota que lista os valores disponíveis para cada filtro
 - [x] Resposta paginada com o total de resultados
 - [x] Interface visual com NiceGUI (cartões, filtros, busca, paginação, detalhe e tema escuro)
+- [x] Rota de estatísticas e gráficos
 
 **Próximos passos**
 
-- [ ] Rota de estatísticas e gráficos
 - [ ] Migração do JSON para SQLite
 
 ## Estrutura do projeto
@@ -146,6 +146,7 @@ python ui/main.py
 | GET    | `/api/v1/characters`         | Lista personagens, com filtros e paginação (devolve o total de resultados) |
 | GET    | `/api/v1/characters/{id}`    | Retorna um personagem pelo id (ex.: `hu-tao`) |
 | GET    | `/api/v1/characters/filters` | Lista os valores disponíveis para cada filtro |
+| GET    | `/api/v1/characters/estats`  | Exibe estatísticas de personagens             |
 
 ### Filtros de `/api/v1/characters`
 
