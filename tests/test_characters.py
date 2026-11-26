@@ -3,6 +3,7 @@ import pytest
 
 from app.schemas.character import Region, Vision, WeaponType, CaseInsensitiveEnum
 from app.core.config import settings
+from app.core.rate_limit import limiter
 
 def test_root(client):
     """Testa o endpoint raiz."""
@@ -145,3 +146,19 @@ def test_text_at_limit_is_accepted(client, param):
     response = client.get("api/v1/characters", params={param: text})
     assert response.status_code == 200
     assert response.json()["total"] == 0
+
+def test_rate_limit_returns_429_after_limit(client):
+    """Passando do limite configurado a API devolve 429."""
+    allowed = int(settings.rate_limit.split("/")[0])
+
+    limiter.enabled = True # ligado só nesse teste
+    try:
+        statuses = [
+            client.get("api/v1/characters").status_code
+            for _ in range(allowed + 1)
+        ]
+    finally:
+        limiter.enabled = False # garante o desligamento mesmo se o teste falhar
+
+    assert statuses[:allowed] == [200] * allowed # as primeiras passam
+    assert statuses[-1] == 429                   # a seguinte é bloqueada

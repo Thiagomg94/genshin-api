@@ -6,6 +6,7 @@ from app.api.deps import get_repository
 from app.main import app
 from app.repositories.character_repository import CharacterRepository
 from app.schemas.character import Character
+from app.core.rate_limit import limiter
 
 def make_character(**overrides) -> Character:
     """Cria um personagem de teste."""
@@ -28,6 +29,7 @@ def make_character(**overrides) -> Character:
 @pytest.fixture
 def client():
     """Cria um cliente de teste com repositório para a aplicação FastAPI."""
+    limiter.enabled = False # demais testes não devem ser afetados pelo limite
     fake_repo = CharacterRepository(
         [
             make_character(id="diluc", name="Diluc", weapon_type="Claymore", rarity=5,
