@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     app_version_api: str = "/api/v1"
     characters_data_path: Path = BASE_DIR / "data" / "characters.json"
     max_text_length: int = 50
+    rate_limit: str = "60/minute"
+    rate_limit_enabled: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
