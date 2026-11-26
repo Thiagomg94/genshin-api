@@ -10,7 +10,7 @@
 
 - **Backend:** FastAPI
 - **Linguagem:** Python 3.11+
-- **Bibliotecas:** Pydantic, pydantic-settings, Uvicorn
+- **Bibliotecas:** Pydantic, pydantic-settings, Uvicorn, slowapi
 - **Testes:** pytest e httpx2
 - **Dados:** `app/data/characters.json` (117 personagens), somente leitura
 - **Interface:** NiceGUI 4 (`ui/`), consome a API via `httpx2`
@@ -24,7 +24,7 @@ Fluxo da requisição: `endpoint → service → repository → dados`. Cada cam
 - `app/services/`: regras de negócio (paginação, levanta `CharacterNotFoundError`)
 - `app/repositories/`: acesso aos dados e filtros (hoje JSON; no futuro, banco)
 - `app/schemas/`: modelos Pydantic e Enums (`Region`, `Vision`, `WeaponType`)
-- `app/core/`: configurações (`config.py`) e erros globais (`exceptions.py`)
+- `app/core/`: configurações (`config.py`) e erros globais (`exceptions.py`) e rate limit (`rate_limit.py`)
 - Rotas da v1 ficam sob `/api/v1`
 - `ui/`: interface NiceGUI, separada da API. Só conversa com ela por HTTP e nunca importa de `app/`
   - `api_client.py`: chamadas assíncronas à API (`fetch_characters`, `fetch_filter_options`)
@@ -40,6 +40,9 @@ Convenções:
 - Na interface, o estado da página fica em um `SearchState` (um por cliente) e a tela é redesenhada com `@ui.refreshable`.
 - Respostas antigas da API são descartadas com `request_id`.
 - Toda chamada à API na interface é `async` e trata `ApiError`.
+- Parâmetros de texto livre usam `Query(max_length=settings.max_text_length)`.
+- Toda rota nova deve usar o decorador `@limit_requests` (abaixo do `@router.get`) e receber `request: Request` como primeiro parâmetro. O `default_limits` com middleware do slowapi NÃO funciona com rotas de `APIRouter`.
+- Limites configuráveis no `.env`: `MAX_TEXT_LENGTH`, `RATE_LIMIT` (ex.: `60/minute`) e `RATE_LIMIT_ENABLED`. Nos testes, o limitador fica desligado no `conftest.py`.
 
 ## 🚀 Comandos Úteis
 
