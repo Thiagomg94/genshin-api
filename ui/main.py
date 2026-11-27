@@ -1,4 +1,5 @@
 """Interface visual da API Genshin Impact (NiceGUI)."""
+import os
 import math
 from dataclasses import dataclass
 
@@ -8,6 +9,7 @@ from api_client import ApiError, fetch_characters, fetch_filter_options, fetch_s
 from components import character_card, character_detail
 from theme import vision_color, rarity_color
 from charts import bar_options, donut_options
+from layout import setup_page
 
 # Quantos cartões aparecem por página
 PAGE_SIZE = 12
@@ -32,17 +34,8 @@ class SearchState:
 # response_timeout: tempo máximo (em segundos) para montar a página
 @ui.page("/", response_timeout=15)
 async def index() -> None:
-    """Página inicial: filtros, cartões de personagens e paginação."""
-    dark = ui.dark_mode()
-
-    # Cabeçalho
-    with ui.row().classes("w-full items-center justify-between"):
-        ui.label("API Genshin Impact").classes("text-h4")
-        ui.link("📊 Estatísticas", "/estatisticas")
-        ui.switch(
-            "Tema escuro",
-            on_change=lambda e: dark.enable() if e.value else dark.disable(),
-        )
+    """Tema, largura máxima e cabeçalho compartilhados."""
+    setup_page()
 
     try:
         # Os valores das listas suspensas vêm da rota /characters/filters
@@ -178,10 +171,8 @@ async def index() -> None:
 @ui.page("/estatisticas", response_timeout=15)
 async def stats_page():
     """Página com gráficos sobre a composição do catálogo de personagens."""
-    with ui.row().classes("w-full items-center justify-between"):
-        ui.label("Estatísticas").classes("text-2xl font-bold")
-        # Link de volta para a página principal.
-        ui.link("← Voltar aos personagens", "/")
+    setup_page()
+    ui.label("Estatísticas").classes("text-2x1 font-bold")
 
     # Busca os dados; se a API estiver fora do ar, mostra o erro e para por aqui.
     try:
@@ -205,4 +196,6 @@ async def stats_page():
                 ui.echart(options).classes("w-full h-72")
 
 
-ui.run(title="Genshin Impact")
+ui.run(title="Genshin Impact",
+       storage_secret=os.getenv("UI_STORAGE_SECRET", "dev-only-change-me"),
+)
